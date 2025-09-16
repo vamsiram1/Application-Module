@@ -4,6 +4,7 @@
   padding: 15px;
   border: 1px solid #f6f8f9;
   background-color: #ffffff;
+  position:relative;
 }
 
 .prev_years_graphs_section {

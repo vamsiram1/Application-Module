@@ -5,6 +5,7 @@
   box-sizing: border-box;
   margin-top: 54px;
   margin-left: 17%;
+  position:relative;
 }
 
 .analytics_wrapper {

@@ -2,7 +2,8 @@
   background-color: #fff;
   border-radius: 12px;
   padding: 20px 55px;
- 
+ display:flex;
+ flex-direction: column;
 }
 
 .Payment_Info_Section_payment_section_header {

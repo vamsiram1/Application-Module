@@ -1040,7 +1040,8 @@ const PaymentInfoSection = ({
           textDecoration: 'none',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px'
+          gap: '8px',
+          marginTop:"10px"
         }}
       >
         <figure style={{ margin: 0, display: "flex", alignItems: "center" }}>
