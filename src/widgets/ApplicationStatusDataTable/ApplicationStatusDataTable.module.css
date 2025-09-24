@@ -14,11 +14,11 @@
 }
  
 /* Header */
-
+ 
 .empty_head_column{
   border-bottom: 2px solid #dee2e6;
 }
-
+ 
  
 .table_header {
   padding: 12px 16px;
@@ -27,7 +27,7 @@
   text-transform: uppercase;
   color: #84919A;
   border-bottom: 2px solid #dee2e6;
-  text-align: left;       
+  text-align: left;      
   vertical-align: middle;
 }
  
@@ -45,14 +45,19 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 24px;
-  text-align: left;
+  /* text-align: left; */
   vertical-align: middle;
-  padding: 8px 14px;
+  padding: 7px 16px;
 }
 .table th:first-child,
 .table td:first-child {
   border-right: 1px solid #dee2e6;
 }
+/* .table td:first-child {
+ 
+  /* display: flex;
+  justify-content: center;
+} */
  
 /* Striped rows */
 table tbody tr:nth-child(odd) {
@@ -104,7 +109,7 @@ table tbody tr:nth-child(odd) {
   font-size: 12px;
   font-weight: 400;
 }
-
+ 
 .update_btn:disabled {
   background: #F5F5F5;
   color: #999;
@@ -144,6 +149,32 @@ table tbody tr:nth-child(odd) {
   display: flex;
 }
  
+.prevButton, .nextButton{
+ 
+  padding: 6px 17px;
+  border: 1px solid #1B1F2426;
+  background-color: #3425FF;
+  color: #F6F8F9;
+  font-size: 14px;
+  font-weight: 600;
+}
+ 
+.prevButton{
+ border-radius: 6px 0px 0px 6px;
+}
+ 
+.nextButton{
+  border-radius: 0px 6px 6px 0px;
+}
+ 
+.prevButtonDisabled,
+.nextButtonDisabled {
+  opacity: 0.5;
+  pointer-events: none;
+  color: #3425FF;
+  background-color: #F6F8FA;
+}
+ 
 button.prev_button,
 button.next_button {
   padding: 4px 12px;
@@ -168,11 +199,10 @@ button.disabled {
   color: #888;
   cursor: not-allowed;
 }
-
 .modal{
   position: relative;
 }
-
+ 
 .modal{
   position: absolute;
   top:50%;
@@ -183,36 +213,37 @@ button.disabled {
   background: #FFF;
   padding: 40px;
 }
-
+ 
 .modal_top{
   display: flex;
   justify-content: space-between;
   padding: 9px 0px;
   border-bottom: 1px solid #DEDEDE;
 }
-
+ 
 .modal_top_left{
   display: flex;
   flex-direction: column;
   gap: 4px;
-
+ 
 }
 .xicon{
   cursor: pointer;
 }
-
+ 
 .modal_heading{
   color: #393939;
   font-size: 18px;
   font-weight: 700;
 }
-
+ 
 .modal_sub{
   color: #575757;
   font-size: 12px;
   font-weight: 400;
 }
-
+ 
 .modal_form{
   padding-top: 25px;
 }
+ 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useRef,useEffect} from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,7 +9,7 @@ import { useLocation } from "react-router-dom";
 import crossicon from "../../assets/application-status/crossicon";
 import Button from "../Button/Button";
 import styles from "./ApplicationStatusDataTable.module.css";
-
+ 
 const ApplicationStatusDataTable = ({
   columns,
   data,
@@ -17,7 +17,7 @@ const ApplicationStatusDataTable = ({
   onSelectRow,
   pageIndex,
   setPageIndex,
-  pageSize,
+  pageSize=10,
   totalData,
   fieldMapping = {},
   formComponent: FormComponent,
@@ -26,7 +26,12 @@ const ApplicationStatusDataTable = ({
   onNavigateToDamage,
 }) => {
   const { pathname } = useLocation();
-
+ 
+   // Derive totals and paging
+   const total = typeof totalData === "number" ? totalData : data.length;
+   const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+ 
+ 
   const table = useReactTable({
     data,
     columns,
@@ -34,11 +39,11 @@ const ApplicationStatusDataTable = ({
   });
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-
+ 
   const isIndeterminate =
     table.getRowModel().rows.some((r) => r.original.isSelected) &&
     !table.getRowModel().rows.every((r) => r.original.isSelected);
-
+ 
   const mapRowDataToInitialValues = (rowData) => {
     if (!rowData) return {};
     const mappedValues = {};
@@ -47,18 +52,18 @@ const ApplicationStatusDataTable = ({
     });
     return { ...rowData, ...mappedValues };
   };
-
+ 
   const handleUpdateClick = (rowData) => {
     if (!rowData || !FormComponent) return;
     setSelectedRow(rowData);
     setOpen(true);
   };
-
+ 
   const handleClose = () => {
     setOpen(false);
     setSelectedRow(null);
   };
-
+ 
   const handleFormSubmit = (values) => {
     if (!selectedRow) return;
     const updatedRow = { ...selectedRow };
@@ -68,11 +73,11 @@ const ApplicationStatusDataTable = ({
     onUpdate(updatedRow);
     handleClose();
   };
-
+ 
   const handleStatusUpdate = (rowData, status) => {
     // Normalize status to handle case variations
     const normalizedStatus = status?.toLowerCase()?.trim();
-    
+   
     switch (normalizedStatus) {
       case "with pro":
       case "available":
@@ -110,7 +115,7 @@ const ApplicationStatusDataTable = ({
         break;
     }
   };
-
+ 
   const getModalHeading = () => {
     if (pathname.includes("zone")) {
       return "Update Distribution to Zone";
@@ -121,13 +126,47 @@ const ApplicationStatusDataTable = ({
     }
     return "Update Application"; // Fallback
   };
-
+ 
+   // Header checkbox (page scope)
+   const allSelected =
+   table.getRowModel().rows.length > 0 &&
+   table.getRowModel().rows.every((r) => r.original.isSelected);
+ 
+//  const isIndeterminate =
+//    table.getRowModel().rows.some((r) => r.original.isSelected) && !allSelected;
+ 
+  const headerCheckboxRef = useRef(null);
+  useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = isIndeterminate;
+    }
+  }, [isIndeterminate]);
+ 
+ 
+   // pagination disabled states
+   const prevDisabled = pageIndex === 0;
+   const nextDisabled = pageIndex + 1 >= totalPages;
+ 
+ 
   return (
     <div className={styles.table_wrapper}>
       <table className={styles.table}>
         <thead>
           <tr>
-            <th className={styles.empty_head_column}></th>
+            <th className={styles.empty_head_column}>
+            <input
+                type="checkbox"
+                ref={headerCheckboxRef}
+                className={styles.custom_checkbox}
+                checked={allSelected}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  table.getRowModel().rows.forEach((r) =>
+                    onSelectRow?.(r.original, checked)
+                  );
+                }}
+              />
+            </th>
             {table.getHeaderGroups().map((headerGroup) =>
               headerGroup.headers.map((header) => (
                 <th key={header.id} className={styles.table_header}>
@@ -182,7 +221,7 @@ const ApplicationStatusDataTable = ({
             {Math.ceil(totalData / pageSize)}
           </span>
           <div className={styles.pagination_buttons}>
-            <Button
+            {/* <Button
               buttonname="Prev"
               onClick={() => setPageIndex((prev) => Math.max(prev - 1, 0))}
               disabled={pageIndex === 0}
@@ -197,7 +236,31 @@ const ApplicationStatusDataTable = ({
               }
               disabled={(pageIndex + 1) * pageSize >= totalData}
               type="button"
-            />
+            /> */}
+               <button
+              type="button"
+              onClick={() => setPageIndex((prev) => Math.max(prev - 1, 0))}
+              disabled={prevDisabled}
+              className={`${styles.prevButton} ${
+                prevDisabled ? styles.prevButtonDisabled : ""
+              }`}
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setPageIndex((prev) =>
+                  prev + 1 < totalPages ? prev + 1 : prev
+                )
+              }
+              disabled={nextDisabled}
+              className={`${styles.nextButton} ${
+                nextDisabled ? styles.nextButtonDisabled : ""
+              }`}
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
@@ -232,5 +295,5 @@ const ApplicationStatusDataTable = ({
     </div>
   );
 };
-
+ 
 export default ApplicationStatusDataTable;
