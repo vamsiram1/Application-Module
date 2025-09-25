@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import "./App.css";
 
 import Header from "./components/HeaderComponents/Header";
@@ -85,6 +85,7 @@ function App() {
         
         <div className="scopes_app">
           <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login/*" element={<LoginContainer />} />
             <Route path="/scopes/*" element={<AppWrapper />} />
           </Routes>

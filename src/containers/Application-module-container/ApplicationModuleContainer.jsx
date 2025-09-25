@@ -27,6 +27,7 @@ const ApplicationModuleContainer = () => {
       >
         <Routes>
           {/* Default redirect → /analytics */}
+          
           <Route index element={<Navigate to="analytics" replace />} />
           <Route path="analytics" element={<AnalyticsWholeContainer />} />
           <Route path="distribute/*" element={<DistributeTab />} />
