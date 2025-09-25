@@ -838,7 +838,7 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
 
   const handleBack = () => {
     if (activeStep > 0) setActiveStep((prev) => prev - 1);
-    else navigate("/application");
+    else navigate("/scopes/application/status");
   };
 
   const handleSubmit = async (values) => {
@@ -1093,7 +1093,7 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
                 }
               });
              
-              navigate(`/application/${appNo}/${pathSegment}`, {
+              navigate(`/scopes/application/${appNo}/${pathSegment}`, {
                 state: {
                   initialValues: currentData,
                 },
@@ -1114,7 +1114,7 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
           amount={initialValues.amount}
           campus={initialValues.campusName || initialValues.joinedCampus || initialValues.campus || ""}
           zone={initialValues.zoneName || initialValues.district || initialValues.zone || ""}
-          onBack={() => navigate("/application")}
+          onBack={() => navigate("/scopes/application")}
           statusType={successStatusType}
         />
       ) : selectedStatus === "Confirmation" ? (
@@ -1250,7 +1250,7 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
                       console.log("🔍 Navigating to confirmation with admission number:", appNo);
                       
                       if (appNo) {
-                        navigate(`/application/status/${appNo}/${pathSegment}`);
+                        navigate(`/scopes/application/status/${appNo}/${pathSegment}`);
                       } else {
                         console.warn("⚠️ No admission number available for navigation");
                       }

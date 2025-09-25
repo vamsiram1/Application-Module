@@ -312,7 +312,7 @@ const ApplicationStatus = () => {
      
       console.log("🚀 Navigating with initialValues:", initialValues);
      
-      navigate(`/application/status/${applicationNo}/${route}`, {
+      navigate(`/scopes/application/status/${applicationNo}/${route}`, {
         state: {
           initialValues: initialValues,
         },

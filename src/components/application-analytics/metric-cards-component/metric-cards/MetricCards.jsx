@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from "react";
 import styles from "../metric-cards/MetricCards.module.css";
 import axios from "axios";
+import {useQuery} from "@tanstack/react-query"
 
 const MetricCards = () => {
-  // const [isLoading,setIsLoading]=useState
-  const [cards, setCards] = useState([]);
+  const fetchCards=async ()=>{
+    const response=await axios.get("http://localhost:8080/api/dashboard/CO/metrics");
+    console.log(response.data)
+    return response.data ?? [];
+  }
 
-  useEffect(() => {
-    axios.get("http://localhost:8080/api/dashboard/CO/metrics")
-      .then(res => {
-        console.log("API data:", res.data);
-        setCards(res.data); 
-      })
-      .catch(console.error);
-  }, []);
+
+  const {data:cards, isLoading, error}=useQuery(
+    {
+      queryKey:["dashboardMetrics"],
+      queryFn:fetchCards,
+    }
+  );
+  if (isLoading) return <p>Loading....</p>
+  if (error) return <p>error : {error.message}</p>
 
   return (
     <div className={styles.metric_cards_container}>

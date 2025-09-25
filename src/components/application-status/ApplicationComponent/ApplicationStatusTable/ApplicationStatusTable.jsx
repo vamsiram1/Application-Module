@@ -119,7 +119,7 @@ const ApplicationStatusTable = ({ filteredData, setData, pageIndex, setPageIndex
       
       console.log("🚀 Table navigating to Sale with initialValues:", initialValues);
       
-      navigate(`/application/status/${id}/sale`, {
+      navigate(`/scopes/application/status/${id}/sale`, {
         state: { 
           initialValues: initialValues,
         },
@@ -131,7 +131,7 @@ const ApplicationStatusTable = ({ filteredData, setData, pageIndex, setPageIndex
     const rowObj = unwrapRow(row);
     const id = extractId(rowObj);
     if (id != null) {
-      navigate(`/application/status/${id}/confirmation`, {
+      navigate(`/scopes/application/status/${id}/confirmation`, {
         state: { 
           initialValues: {
             applicationNo: rowObj.applicationNo || "",
@@ -158,7 +158,7 @@ const ApplicationStatusTable = ({ filteredData, setData, pageIndex, setPageIndex
     const rowObj = unwrapRow(row);
     const id = extractId(rowObj);
     if (id != null) {
-      navigate(`/application/status/${id}/damaged`, {
+      navigate(`/scopes/application/status/${id}/damaged`, {
         state: { 
           initialValues: {
             applicationNo: rowObj.applicationNo || "",

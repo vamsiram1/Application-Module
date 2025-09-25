@@ -13,25 +13,25 @@ import warehouse_icon from "../../../assets/sidebaricons/warehouse_icon.svg";
 import application_icon from "../../../assets/sidebaricons/application_icon.svg";
 
 export const listData = [
-  { icon: dashboard_icon, name: "Dashboard", route: "/dashboard" },
-  { icon: student_icon, name: "Student", route: "/students" },
-  { icon: application_icon, name: "Application", route: "/application" },
-  { icon: employee_icon, name: "Employee", route: "/employee" },
-  { icon: fleet_icon, name: "Fleet", route: "/fleet" },
-  { icon: warehouse_icon, name: "Warehouse", route: "/warehouse" },
-  { icon: sms_icon, name: "SMS", route: "/sms" },
-  { icon: questiobank_icon, name: "Question Bank", route: "/question-bank" },
+  { icon: dashboard_icon, name: "Dashboard", route: "/scopes/dashboard" },
+  { icon: student_icon, name: "Student", route: "/scopes/students" },
+  { icon: application_icon, name: "Application", route: "/scopes/application" },
+  { icon: employee_icon, name: "Employee", route: "/scopes/employee" },
+  { icon: fleet_icon, name: "Fleet", route: "/scopes/fleet" },
+  { icon: warehouse_icon, name: "Warehouse", route: "/scopes/warehouse" },
+  { icon: sms_icon, name: "SMS", route: "/scopes/sms" },
+  { icon: questiobank_icon, name: "Question Bank", route: "/scopes/question-bank" },
   {
     icon: assetsmanagement_icon,
     name: "Assets Management",
-    route: "/assets-management",
+    route: "/scopes/assets-management",
   },
   {
     icon: paymentservice_icon,
     name: "Payment Service",
-    route: "/payments-service",
+    route: "/scopes/payments-service",
   },
-  { icon: cctv_icon, name: "CCTV", route: "/cctv" },
-  { icon: hrms_icon, name: "HRMS", route: "/hrms" },
-  { icon: master_icon, name: "Masters", route: "/masters" },
+  { icon: cctv_icon, name: "CCTV", route: "/scopes/cctv" },
+  { icon: hrms_icon, name: "HRMS", route: "/scopes/hrms" },
+  { icon: master_icon, name: "Masters", route: "/scopes/masters" },
 ];

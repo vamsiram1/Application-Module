@@ -3,15 +3,16 @@ import ZoneNameDropdown from "../zone-name-dropdown/ZoneNameDropdown";
 import styles from "./SearchDropdown.module.css";
 
 
-const SearchDropdown = ({ userRole = "Zone", onTabChange }) => {
+const SearchDropdown = ({ userRole = "CEO", onTabChange }) => {
   // Master order (for consistent rendering)
   const TAB_ORDER = ["Zone", "DGM", "Campus"];
 
   // Visibility rules per role
   const allowedTabsByRole = {
-    Zone: ["Zone", "DGM","Campus"],
-    DGM: ["DGM", "Campus"],
-    Campus: ["Campus"],
+    CEO:["Zone", "DGM","Campus"],
+    Zone: ["DGM","Campus"],
+    DGM: [ "Campus"],
+    Campus: [],
   };
 
   // Compute visible tabs for the current role
