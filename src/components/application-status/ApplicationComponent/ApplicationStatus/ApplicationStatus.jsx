@@ -34,7 +34,7 @@ const ApplicationStatus = () => {
   });
  
   // Baseline refs to detect if user has applied any filter changes
-  const initialCampusRef = useRef(38);
+  const initialCampusRef = useRef(1);
   const initialStudentCategoryRef = useRef({
     all: true,
     sold: false,
@@ -113,9 +113,22 @@ const ApplicationStatus = () => {
         const campusId = selectedCampus;
         const result = await getApplicationStatus(campusId);
         console.log("API Result:", result);
-        const uniqueStatuses = [...new Set(result.map((item) => item.status ?? "Unknown"))];
+       
+        // Handle nested API response structure
+        let actualData = result;
+        if (Array.isArray(result) && result.length === 2 && result[0] === "java.util.ArrayList") {
+          actualData = result[1];
+        } else if (Array.isArray(result) && result.length > 0 && typeof result[0] === "string") {
+          // If first element is a string, the actual data is likely in the second element
+          actualData = result[1] || result;
+        }
+       
+        console.log("Actual Data:", actualData);
+        console.log("First few items:", actualData.slice(0, 3));
+        const uniqueStatuses = [...new Set(actualData.map((item) => item.status ?? "Unknown"))];
         console.log("Unique Status Values:", uniqueStatuses);
-        const normalized = normalizeApiResponse(Array.isArray(result) ? result : []);
+        const normalized = normalizeApiResponse(Array.isArray(actualData) ? actualData : []);
+        console.log("Normalized data sample:", normalized.slice(0, 3));
         setData(normalized);
       } catch (err) {
         console.error("Error fetching application status:", err);
@@ -128,6 +141,10 @@ const ApplicationStatus = () => {
   }, [selectedCampus]);
  
   const filteredDataMemo = useMemo(() => {
+    console.log("Starting filtering with data:", data.length, "items");
+    console.log("selectedCampus:", selectedCampus, "type:", typeof selectedCampus);
+    console.log("studentCategory:", studentCategory);
+   
     let filtered = data;
  
     filtered = filtered.map((item) => {
@@ -163,18 +180,28 @@ const ApplicationStatus = () => {
       return { ...item, displayStatus };
     });
  
+    console.log("After status mapping:", filtered.length, "items");
+ 
     if (search) {
       filtered = filtered.filter((item) =>
         String(item.applicationNo ?? "")
           .toLowerCase()
           .includes(String(search).toLowerCase())
       );
+      console.log("After search filter:", filtered.length, "items");
     }
  
     if (selectedCampus !== "All Campuses") {
-      filtered = filtered.filter(
-        (item) => (item.campusId ?? item.cmps_id ?? item.campus_id ?? "") === selectedCampus
-      );
+      console.log("Applying campus filter for:", selectedCampus);
+      filtered = filtered.filter((item) => {
+        const itemCampusId = item.campusId ?? item.cmps_id ?? item.campus_id ?? "";
+        const matches = String(itemCampusId) === String(selectedCampus);
+        if (!matches && filtered.length < 10) { // Only log first few for debugging
+          console.log("Campus mismatch - item:", itemCampusId, "selected:", selectedCampus, "matches:", matches);
+        }
+        return matches;
+      });
+      console.log("After campus filter:", filtered.length, "items");
     }
  
     const isAllSelected =
@@ -184,10 +211,14 @@ const ApplicationStatus = () => {
       !studentCategory.unsold &&
       !studentCategory.withPro &&
       !studentCategory.damaged;
+   
+    console.log("isAllSelected:", isAllSelected);
+   
     if (!isAllSelected) {
+      console.log("Applying category filter");
       filtered = filtered.filter((item) => {
         const status = item.displayStatus;
-        return (
+        const matches = (
           studentCategory.all ||
           (studentCategory.sold && status === "Sold") ||
           (studentCategory.confirmed && status === "Confirmed") ||
@@ -195,10 +226,15 @@ const ApplicationStatus = () => {
           (studentCategory.withPro && status === "With PRO") ||
           (studentCategory.damaged && status === "Damaged")
         );
+        if (!matches && filtered.length < 10) { // Only log first few for debugging
+          console.log("Category mismatch - status:", status, "matches:", matches);
+        }
+        return matches;
       });
+      console.log("After category filter:", filtered.length, "items");
     }
  
-    console.log("Computed filteredData:", filtered);
+    console.log("Final filteredData:", filtered.length, "items");
     return filtered;
   }, [data, search, selectedCampus, studentCategory]);
  
@@ -426,4 +462,3 @@ const ApplicationStatus = () => {
 };
  
 export default ApplicationStatus;
- 

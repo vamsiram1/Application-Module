@@ -40,7 +40,7 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
   const { applicationNo, status } = useParams();
   const [activeStep, setActiveStep] = useState(0);
   const [activeConfirmationStep, setActiveConfirmationStep] = useState(0);
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(status ? status.charAt(0).toUpperCase() + status.slice(1) : "");
   const [showCouponModal, setShowCouponModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successStatusType, setSuccessStatusType] = useState("sale");
@@ -49,6 +49,15 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
   const [persistentData, setPersistentData] = useState({ campus: "", zone: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicationData, setApplicationData] = useState(null);
+
+  // Set selectedStatus from URL parameter
+  useEffect(() => {
+    if (status) {
+      const capitalizedStatus = status.charAt(0).toUpperCase() + status.slice(1);
+      setSelectedStatus(capitalizedStatus);
+      console.log("🔍 Setting selectedStatus from URL:", capitalizedStatus);
+    }
+  }, [status]);
 
   const steps = [
     "General Information",
@@ -1033,7 +1042,7 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
   });
 
   console.log("🔍 ApplicationStatusForm render - selectedStatus:", selectedStatus, "showSuccess:", showSuccess);
-  
+ 
   return (
     <div className={styles.Application_Status_Form_main_app_status_container}>
       <div className={styles.Application_Status_Form_main_app_status_header}>
@@ -1093,7 +1102,7 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
                 }
               });
              
-              navigate(`/scopes/application/${appNo}/${pathSegment}`, {
+              navigate(`/scopes/application/status/${appNo}/${pathSegment}`, {
                 state: {
                   initialValues: currentData,
                 },
@@ -1210,13 +1219,13 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
                     onContinue={(backendResponse) => {
                       console.log("🔍 onContinue called with backend response:", backendResponse);
                       console.log("🔍 Backend response type:", typeof backendResponse);
-                      
+                     
                       // Since backend returns a string, we'll use the existing application number
                       // The backend has already created the record with the studAdmsNo we sent
                       const admissionNo = values.applicationNo || values.studAdmsNo || initialValues.applicationNo || applicationNo;
-                      
+                     
                       console.log("🔍 Using application number as admission number:", admissionNo);
-                      
+                     
                       // Set sale data with the admission number and map fields for StudentInformation
                       const saleDataWithAdmission = {
                         ...values,
@@ -1238,17 +1247,17 @@ const ApplicationStatusForm = ({ onBack, initialData = {} }) => {
                         reason: values.reason || "",
                         reasonId: values.concessionReasonId || ""
                       };
-                      
+                     
                       console.log("🔍 Setting sale data:", saleDataWithAdmission);
                       setSaleData(saleDataWithAdmission);
                       console.log("🔍 Setting selectedStatus to Confirmation");
                       setSelectedStatus("Confirmation");
-                      
+                     
                       const pathSegment = "confirmation";
                       const appNo = admissionNo;
-                      
+                     
                       console.log("🔍 Navigating to confirmation with admission number:", appNo);
-                      
+                     
                       if (appNo) {
                         navigate(`/scopes/application/status/${appNo}/${pathSegment}`);
                       } else {

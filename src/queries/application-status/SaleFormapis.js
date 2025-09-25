@@ -14,11 +14,38 @@ const handleApiError = (error) => {
   throw error.response?.data || error.message || 'An error occurred';
 };
 
+// Helper function to handle nested API response structure
+const processApiResponse = (responseData, apiName) => {
+  console.log(`${apiName} API response:`, responseData);
+ 
+  // Handle nested API response structure
+  let actualData = responseData;
+  if (Array.isArray(responseData) && responseData.length === 2 && responseData[0] === "java.util.ArrayList") {
+    actualData = responseData[1];
+  } else if (Array.isArray(responseData) && responseData.length > 0 && typeof responseData[0] === "string") {
+    actualData = responseData[1] || responseData;
+  }
+ 
+  console.log(`Processed ${apiName} data:`, actualData);
+  return actualData;
+};
+
 // API calls for dropdowns (aligned with backend endpoints)
 export const fetchAdmissionTypes = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/admission-types`);
-    return response.data;
+    console.log("Admission types API response:", response.data);
+   
+    // Handle nested API response structure
+    let actualData = response.data;
+    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
+      actualData = response.data[1];
+    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
+      actualData = response.data[1] || response.data;
+    }
+   
+    console.log("Processed admission types data:", actualData);
+    return actualData;
   } catch (error) {
     handleApiError(error);
   }
@@ -27,7 +54,18 @@ export const fetchAdmissionTypes = async () => {
 export const fetchStudentTypes = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/student-types`);
-    return response.data;
+    console.log("Student types API response:", response.data);
+   
+    // Handle nested API response structure
+    let actualData = response.data;
+    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
+      actualData = response.data[1];
+    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
+      actualData = response.data[1] || response.data;
+    }
+   
+    console.log("Processed student types data:", actualData);
+    return actualData;
   } catch (error) {
     handleApiError(error);
   }
@@ -36,7 +74,18 @@ export const fetchStudentTypes = async () => {
 export const fetchGenders = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/genders`);
-    return response.data;
+    console.log("Genders API response:", response.data);
+   
+    // Handle nested API response structure
+    let actualData = response.data;
+    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
+      actualData = response.data[1];
+    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
+      actualData = response.data[1] || response.data;
+    }
+   
+    console.log("Processed genders data:", actualData);
+    return actualData;
   } catch (error) {
     handleApiError(error);
   }
@@ -47,16 +96,13 @@ export const getSections = async () => {
     const response = await axios.get(`${API_BASE_URL}/sections`, {
       headers: { "Content-Type": "application/json" },
     });
-    if (response.data && typeof response.data === 'object') {
-      return Array.isArray(response.data) ? response.data : [response.data];
-    } else if (response.data) {
-      try {
-        const parsedData = JSON.parse(response.data);
-        return Array.isArray(parsedData) ? parsedData : [parsedData];
-      } catch (parseError) {
-        console.error("Failed to parse sections data:", parseError);
-        return [];
-      }
+   
+    // Use our helper function to process the response
+    const processedData = processApiResponse(response.data, "sections");
+   
+    // Additional processing for sections if needed
+    if (processedData && typeof processedData === 'object') {
+      return Array.isArray(processedData) ? processedData : [processedData];
     }
     return [];
   } catch (error) {
@@ -72,7 +118,7 @@ export const getSections = async () => {
 export const fetchCampuses = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/campuses`);
-    return response.data;
+    return processApiResponse(response.data, "campuses");
   } catch (error) {
     handleApiError(error);
   }
@@ -81,7 +127,7 @@ export const fetchCampuses = async () => {
 export const fetchCourses = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/courses`);
-    return response.data;
+    return processApiResponse(response.data, "courses");
   } catch (error) {
     handleApiError(error);
   }
@@ -90,7 +136,7 @@ export const fetchCourses = async () => {
 export const fetchClasses = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/classes`);
-    return response.data;
+    return processApiResponse(response.data, "classes");
   } catch (error) {
     handleApiError(error);
   }
@@ -109,7 +155,7 @@ export const fetchClasses = async () => {
 export const fetchQuotas = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/quotas`);
-    return response.data;
+    return processApiResponse(response.data, "quotas");
   } catch (error) {
     handleApiError(error);
   }
@@ -118,7 +164,7 @@ export const fetchQuotas = async () => {
 export const fetchRelationTypes = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/relation-types`);
-    return response.data;
+    return processApiResponse(response.data, "relation-types");
   } catch (error) {
     handleApiError(error);
   }
@@ -127,7 +173,7 @@ export const fetchRelationTypes = async () => {
 export const fetchCityById = async (id) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/city/${id}`);
-    return response.data;
+    return processApiResponse(response.data, "city-by-id");
   } catch (error) {
     handleApiError(error);
   }
@@ -136,7 +182,7 @@ export const fetchCityById = async (id) => {
 export const fetchOrientationById = async (id) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/orientation/${id}`);
-    return response.data;
+    return processApiResponse(response.data, "orientation-by-id");
   } catch (error) {
     handleApiError(error);
   }
@@ -145,7 +191,7 @@ export const fetchOrientationById = async (id) => {
 export const fetchMandalById = async (id) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/mandal/${id}`);
-    return response.data;
+    return processApiResponse(response.data, "mandal-by-id");
   } catch (error) {
     handleApiError(error);
   }
@@ -154,7 +200,7 @@ export const fetchMandalById = async (id) => {
 export const fetchConcessionReasonById = async (id) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/concession-reason/${id}`);
-    return response.data;
+    return processApiResponse(response.data, "concession-reason-by-id");
   } catch (error) {
     handleApiError(error);
   }
@@ -163,7 +209,7 @@ export const fetchConcessionReasonById = async (id) => {
 export const fetchConcessionReasons = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/concession-reasons`);
-    return response.data;
+    return processApiResponse(response.data, "concession-reasons");
   } catch (error) {
     handleApiError(error);
   }
@@ -172,7 +218,7 @@ export const fetchConcessionReasons = async () => {
 export const fetchOrganizationById = async (id) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/organization/${id}`);
-    return response.data;
+    return processApiResponse(response.data, "organization-by-id");
   } catch (error) {
     handleApiError(error);
   }
@@ -181,7 +227,7 @@ export const fetchOrganizationById = async (id) => {
 export const fetchBankById = async (id) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/bank/${id}`);
-    return response.data;
+    return processApiResponse(response.data, "bank-by-id");
   } catch (error) {
     handleApiError(error);
   }
@@ -192,8 +238,7 @@ export const fetchEmployees = async () => {
     const response = await axios.get(`${API_BASE_URL}/employees`, {
       headers: { "Content-Type": "application/json" },
     });
-    console.log("Employees Response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "employees");
   } catch (error) {
     handleApiError(error);
   }
@@ -203,7 +248,7 @@ export const submitAdmissionForm = async (formData) => {
   try {
     console.log("🚀 ===== SUBMITTING TO BACKEND =====");
     console.log("📋 Complete Form Data being sent:", JSON.stringify(formData, null, 2));
-    
+   
     // Check for null/undefined ID fields that might cause the error
     const nullIdFields = [];
     const checkForNullIds = (obj, prefix = '') => {
@@ -216,17 +261,17 @@ export const submitAdmissionForm = async (formData) => {
         }
       });
     };
-    
+   
     checkForNullIds(formData);
-    
+   
     if (nullIdFields.length > 0) {
       console.log("⚠️ NULL ID FIELDS FOUND:", nullIdFields);
     } else {
       console.log("✅ No null ID fields found");
     }
-    
+   
     console.log("🚀 ===== END BACKEND SUBMISSION =====");
-    
+   
     const response = await axios.post(`${API_BASE_URL}/create`, formData);
     return response.data;
   } catch (error) {
@@ -240,8 +285,7 @@ export const getApplicationDetails = async (applicationNo) => {
     const response = await axios.get(`http://localhost:8080/api/applications/${applicationNo}`, {
       headers: { "Content-Type": "application/json" },
     });
-    console.log(`Application Details Response for ${applicationNo}:`, response.data);
-    return response.data;
+    return processApiResponse(response.data, "application-details");
   } catch (error) {
     console.error("Error fetching application details:", {
       message: error.message,
@@ -260,7 +304,7 @@ export const fetchDistributionStates = async () => {
     console.log("Base URL:", DISTRIBUTION_API_BASE_URL);
     console.log("Full URL:", url);
     console.log("Making request to:", url);
-    
+   
     const response = await axios.get(url);
     console.log("=== API Response Details ===");
     console.log("Response status:", response.status);
@@ -268,8 +312,14 @@ export const fetchDistributionStates = async () => {
     console.log("Response data:", response.data);
     console.log("Response data type:", typeof response.data);
     console.log("Is response data array:", Array.isArray(response.data));
-    
-    return response.data;
+   
+    const processedData = processApiResponse(response.data, "distribution-states");
+    console.log("=== Processed Data ===");
+    console.log("Processed data:", processedData);
+    console.log("Processed data type:", typeof processedData);
+    console.log("Is processed data array:", Array.isArray(processedData));
+   
+    return processedData;
   } catch (error) {
     console.error("=== API Error Details ===");
     console.error("Error object:", error);
@@ -285,7 +335,7 @@ export const fetchDistributionStates = async () => {
 export const fetchDistrictsByDistributionState = async (stateId) => {
   try {
     const response = await axios.get(`${DISTRIBUTION_API_BASE_URL}/districts/${stateId}`);
-    return response.data;
+    return processApiResponse(response.data, "districts-by-state");
   } catch (error) {
     handleApiError(error);
   }
@@ -294,7 +344,7 @@ export const fetchDistrictsByDistributionState = async (stateId) => {
 export const fetchCitiesByDistributionDistrict = async (districtId) => {
   try {
     const response = await axios.get(`${DISTRIBUTION_API_BASE_URL}/cities/${districtId}`);
-    return response.data;
+    return processApiResponse(response.data, "cities-by-district");
   } catch (error) {
     handleApiError(error);
   }
@@ -303,7 +353,7 @@ export const fetchCitiesByDistributionDistrict = async (districtId) => {
 export const fetchMandalsByDistributionDistrict = async (districtId) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/mandals/${districtId}`);
-    return response.data;
+    return processApiResponse(response.data, "mandals-by-district");
   } catch (error) {
     handleApiError(error);
   }
@@ -314,8 +364,7 @@ export const fetchOrganizations = async () => {
   try {
     console.log("Fetching organizations from:", `${API_BASE_URL}/organizations`);
     const response = await axios.get(`${API_BASE_URL}/organizations`);
-    console.log("Organizations API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "organizations");
   } catch (error) {
     console.error("Error fetching organizations:", error);
     handleApiError(error);
@@ -326,8 +375,7 @@ export const fetchCities = async () => {
   try {
     console.log("Fetching cities from:", `${DISTRIBUTION_API_BASE_URL}/cities`);
     const response = await axios.get(`${DISTRIBUTION_API_BASE_URL}/cities`);
-    console.log("Cities API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "cities");
   } catch (error) {
     console.error("Error fetching cities:", error);
     handleApiError(error);
@@ -338,8 +386,7 @@ export const fetchBanksByOrganization = async (organizationId) => {
   try {
     console.log("Fetching banks for organization:", organizationId);
     const response = await axios.get(`${API_BASE_URL}/banks/${organizationId}`);
-    console.log("Banks API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "banks");
   } catch (error) {
     console.error("Error fetching banks by organization:", error);
     handleApiError(error);
@@ -350,8 +397,7 @@ export const fetchBranchesByOrganizationAndBank = async (organizationId, bankId)
   try {
     console.log("Fetching branches for organization:", organizationId, "and bank:", bankId);
     const response = await axios.get(`${API_BASE_URL}/branches/${organizationId}/${bankId}`);
-    console.log("Branches API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "branches");
   } catch (error) {
     console.error("Error fetching branches by organization and bank:", error);
     handleApiError(error);
@@ -363,8 +409,7 @@ export const fetchAuthorizedByAll = async () => {
   try {
     console.log("Fetching authorized by all from:", `${API_BASE_URL}/authorizedBy/all`);
     const response = await axios.get(`${API_BASE_URL}/authorizedBy/all`);
-    console.log("Authorized by all API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "authorized-by");
   } catch (error) {
     console.error("Error fetching authorized by all:", error);
     handleApiError(error);
@@ -375,8 +420,7 @@ export const fetchConcessionReasonAll = async () => {
   try {
     console.log("Fetching concession reason all from:", `${API_BASE_URL}/concessionReson/all`);
     const response = await axios.get(`${API_BASE_URL}/concessionReson/all`);
-    console.log("Concession reason all API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "concession-reasons");
   } catch (error) {
     console.error("Error fetching concession reason all:", error);
     handleApiError(error);
@@ -388,8 +432,7 @@ export const fetchClassesByCampus = async (campusId) => {
   try {
     console.log("Fetching classes by campus from:", `${API_BASE_URL}/classes/by-campus/${campusId}`);
     const response = await axios.get(`${API_BASE_URL}/classes/by-campus/${campusId}`);
-    console.log("Classes by campus API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "classes-by-campus");
   } catch (error) {
     console.error("Error fetching classes by campus:", error);
     handleApiError(error);
@@ -401,8 +444,7 @@ export const fetchOrientationsByClass = async (classId) => {
   try {
     console.log("Fetching orientations by class from:", `${API_BASE_URL}/orientations/by-class/${classId}`);
     const response = await axios.get(`${API_BASE_URL}/orientations/by-class/${classId}`);
-    console.log("Orientations by class API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "orientations-by-class");
   } catch (error) {
     console.error("Error fetching orientations by class:", error);
     handleApiError(error);
@@ -414,8 +456,7 @@ export const fetchOrientationBatches = async (cmpsId, classId, orientationId) =>
   try {
     console.log("Fetching orientation batches from:", `${API_BASE_URL}/${cmpsId}/${classId}/${orientationId}`);
     const response = await axios.get(`${API_BASE_URL}/${cmpsId}/${classId}/${orientationId}`);
-    console.log("Orientation batches API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "orientation-batches");
   } catch (error) {
     console.error("Error fetching orientation batches:", error);
     handleApiError(error);
@@ -427,8 +468,7 @@ export const fetchOrientationDetails = async (cmpsId, classId, orientationId, or
   try {
     console.log("Fetching orientation details from:", `${API_BASE_URL}/${cmpsId}/${classId}/${orientationId}/${orientationBatchId}/details`);
     const response = await axios.get(`${API_BASE_URL}/${cmpsId}/${classId}/${orientationId}/${orientationBatchId}/details`);
-    console.log("Orientation details API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "orientation-details");
   } catch (error) {
     console.error("Error fetching orientation details:", error);
     handleApiError(error);
@@ -440,8 +480,7 @@ export const fetchSchoolStates = async () => {
   try {
     console.log("Fetching school states from:", `http://localhost:8080/distribution/gets/states`);
     const response = await axios.get(`http://localhost:8080/distribution/gets/states`);
-    console.log("School states API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "school-states");
   } catch (error) {
     console.error("Error fetching school states:", error);
     handleApiError(error);
@@ -453,8 +492,16 @@ export const fetchSchoolDistricts = async (stateId) => {
   try {
     console.log("Fetching school districts from:", `http://localhost:8080/distribution/gets/districts/${stateId}`);
     const response = await axios.get(`http://localhost:8080/distribution/gets/districts/${stateId}`);
-    console.log("School districts API response:", response.data);
-    return response.data;
+   
+    console.log("🔍 Raw school districts API response:", response.data);
+    console.log("🔍 Response type:", typeof response.data);
+    console.log("🔍 Response keys:", response.data ? Object.keys(response.data) : "No keys");
+   
+    const processedData = processApiResponse(response.data, "school-districts");
+    console.log("🔍 Processed school districts data:", processedData);
+    console.log("🔍 Processed data keys:", processedData ? Object.keys(processedData) : "No keys");
+   
+    return processedData;
   } catch (error) {
     console.error("Error fetching school districts:", error);
     handleApiError(error);
@@ -466,8 +513,7 @@ export const fetchSchoolTypesNew = async () => {
   try {
     console.log("Fetching school types from:", `${API_BASE_URL}/Type_of_school`);
     const response = await axios.get(`${API_BASE_URL}/Type_of_school`);
-    console.log("School types API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "school-types");
   } catch (error) {
     console.error("Error fetching school types:", error);
     handleApiError(error);
@@ -479,8 +525,7 @@ export const fetchSchoolTypes = async () => {
   try {
     console.log("Fetching school types from:", `${API_BASE_URL}/Type_of_school`);
     const response = await axios.get(`${API_BASE_URL}/Type_of_school`);
-    console.log("School types API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "school-types");
   } catch (error) {
     console.error("Error fetching school types:", error);
     handleApiError(error);
@@ -493,7 +538,17 @@ export const fetchReligions = async () => {
     console.log("Fetching religions from:", `${API_BASE_URL}/religions`);
     const response = await axios.get(`${API_BASE_URL}/religions`);
     console.log("Religions API response:", response.data);
-    return response.data;
+   
+    // Handle nested API response structure
+    let actualData = response.data;
+    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
+      actualData = response.data[1];
+    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
+      actualData = response.data[1] || response.data;
+    }
+   
+    console.log("Processed religions data:", actualData);
+    return actualData;
   } catch (error) {
     console.error("Error fetching religions:", error);
     handleApiError(error);
@@ -506,7 +561,17 @@ export const fetchCastes = async () => {
     console.log("Fetching castes from:", `${API_BASE_URL}/castes`);
     const response = await axios.get(`${API_BASE_URL}/castes`);
     console.log("Castes API response:", response.data);
-    return response.data;
+   
+    // Handle nested API response structure
+    let actualData = response.data;
+    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
+      actualData = response.data[1];
+    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
+      actualData = response.data[1] || response.data;
+    }
+   
+    console.log("Processed castes data:", actualData);
+    return actualData;
   } catch (error) {
     console.error("Error fetching castes:", error);
     handleApiError(error);
@@ -519,7 +584,17 @@ export const fetchBloodGroups = async () => {
     console.log("Fetching blood groups from:", `${API_BASE_URL}/BloodGroup/all`);
     const response = await axios.get(`${API_BASE_URL}/BloodGroup/all`);
     console.log("Blood groups API response:", response.data);
-    return response.data;
+   
+    // Handle nested API response structure
+    let actualData = response.data;
+    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
+      actualData = response.data[1];
+    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
+      actualData = response.data[1] || response.data;
+    }
+   
+    console.log("Processed blood groups data:", actualData);
+    return actualData;
   } catch (error) {
     console.error("Error fetching blood groups:", error);
     handleApiError(error);
@@ -531,8 +606,7 @@ export const fetchAllStudentClasses = async () => {
   try {
     console.log("Fetching all student classes from:", `${API_BASE_URL}/all/Studentclass`);
     const response = await axios.get(`${API_BASE_URL}/all/Studentclass`);
-    console.log("All student classes API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "all-student-classes");
   } catch (error) {
     console.error("Error fetching all student classes:", error);
     handleApiError(error);
@@ -545,8 +619,7 @@ export const fetchBatchTypeByCampusAndClass = async (campusId, classId) => {
   try {
     console.log("Fetching batch type from:", `${API_BASE_URL}/study-typebycmpsId_and_classId?cmpsId=${campusId}&classId=${classId}`);
     const response = await axios.get(`${API_BASE_URL}/study-typebycmpsId_and_classId?cmpsId=${campusId}&classId=${classId}`);
-    console.log("Batch type API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "batch-type");
   } catch (error) {
     console.error("Error fetching batch type:", error);
     handleApiError(error);
@@ -557,8 +630,7 @@ export const fetchOrientationNameByCampusClassAndStudyType = async (campusId, cl
   try {
     console.log("Fetching orientation name from:", `${API_BASE_URL}/orientationbycmpsId_and_classId_and_studyType?cmpsId=${campusId}&classId=${classId}&studyTypeId=${studyTypeId}`);
     const response = await axios.get(`${API_BASE_URL}/orientationbycmpsId_and_classId_and_studyType?cmpsId=${campusId}&classId=${classId}&studyTypeId=${studyTypeId}`);
-    console.log("Orientation name API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "orientation-name");
   } catch (error) {
     console.error("Error fetching orientation name:", error);
     handleApiError(error);
@@ -569,8 +641,7 @@ export const fetchOrientationBatchByAllFields = async (campusId, classId, studyT
   try {
     console.log("Fetching orientation batch from:", `${API_BASE_URL}/orientation-batchbycmpsId_and_classId_and_studyType_and_orientation?cmpsId=${campusId}&classId=${classId}&studyTypeId=${studyTypeId}&orientationId=${orientationId}`);
     const response = await axios.get(`${API_BASE_URL}/orientation-batchbycmpsId_and_classId_and_studyType_and_orientation?cmpsId=${campusId}&classId=${classId}&studyTypeId=${studyTypeId}&orientationId=${orientationId}`);
-    console.log("Orientation batch API response:", response.data);
-    return response.data;
+    return processApiResponse(response.data, "orientation-batch");
   } catch (error) {
     console.error("Error fetching orientation batch:", error);
     handleApiError(error);
@@ -581,8 +652,16 @@ export const fetchOrientationStartDateAndFee = async (campusId, classId, studyTy
   try {
     console.log("Fetching orientation details from:", `${API_BASE_URL}/get_orientation_startDate_and_fee?cmpsId=${campusId}&classId=${classId}&studyTypeId=${studyTypeId}&orientationId=${orientationId}&orientationBatchId=${orientationBatchId}`);
     const response = await axios.get(`${API_BASE_URL}/get_orientation_startDate_and_fee?cmpsId=${campusId}&classId=${classId}&studyTypeId=${studyTypeId}&orientationId=${orientationId}&orientationBatchId=${orientationBatchId}`);
-    console.log("Orientation details API response:", response.data);
-    return response.data;
+   
+    console.log("🔍 Raw API response:", response.data);
+    console.log("🔍 Response type:", typeof response.data);
+    console.log("🔍 Response keys:", response.data ? Object.keys(response.data) : "No keys");
+   
+    const processedData = processApiResponse(response.data, "orientation-details");
+    console.log("🔍 Processed data:", processedData);
+    console.log("🔍 Processed data keys:", processedData ? Object.keys(processedData) : "No keys");
+   
+    return processedData;
   } catch (error) {
     console.error("Error fetching orientation details:", error);
     handleApiError(error);

@@ -1,8 +1,6 @@
-// src/api/distributionUpdateApi.js
-import axiosInstance from "../../axiosInstance";
-
-const DISTRIBUTION_UPDATE = "/distribution/updates";
-
+import axios from "axios";
+const DISTRIBUTION_UPDATE = "http://localhost:8080/distribution/updates";
+ 
 // --- utils ---
 const convertToBackendDateFormat = (ddmmyyyy) => {
   if (!ddmmyyyy) return "";
@@ -10,7 +8,7 @@ const convertToBackendDateFormat = (ddmmyyyy) => {
   if (!day || !month || !year) return "";
   return `${year}-${month}-${day}`; // yyyy-MM-dd
 };
-
+ 
 // --- DTO mappers ---
 const zoneFormDTO = (v) => ({
   academicYearId: v.academicYearId,
@@ -26,7 +24,7 @@ const zoneFormDTO = (v) => ({
   issueDate: convertToBackendDateFormat(v.issueDate),
   createdBy: v.createdBy,
 });
-
+ 
 const dgmFormDTO = (v) => ({
   userId: v.userId || 4079,
   academicYearId: v.academicYearId,
@@ -40,7 +38,7 @@ const dgmFormDTO = (v) => ({
   applicationNoTo: v.applicationNoTo,
   range: v.range,
 });
-
+ 
 const campusFormDTO = (v) => ({
   userId: v.userId || 4178,
   academicYearId: v.academicYearId,
@@ -54,7 +52,7 @@ const campusFormDTO = (v) => ({
   applicationNoTo: v.applicationNoTo,
   range: v.range,
 });
-
+ 
 // --- core sender (axios only) ---
 /**
  * @param {Object} params
@@ -65,10 +63,10 @@ const campusFormDTO = (v) => ({
  */
 export async function sendUpdate({ formType, id, formValues, config }) {
   const t = String(formType ?? "").trim().toLowerCase();
-
+ 
   let endpoint;
   let payload;
-
+ 
   switch (t) {
     case "zone":
       endpoint = `update-zone/${id}`;
@@ -87,20 +85,20 @@ export async function sendUpdate({ formType, id, formValues, config }) {
         `Invalid formType "${formType}". Expected "zone" | "dgm" | "campus".`
       );
   }
-
+ 
   const url = `${DISTRIBUTION_UPDATE}/${endpoint}`;
-
+ 
   // NOTE: axios.put(url, data, config) — do not pass `id` as the 3rd arg.
-  const { data } = await axiosInstance.put(url, payload);
+  const { data } = await axios.put(url, payload);
   return data;
 }
-
+ 
 // --- convenience wrappers (optional) ---
 export const updateZone = (id, values, config) =>
   sendUpdate({ formType: "zone", id, formValues: values, config });
-
+ 
 export const updateDgm = (id, values, config) =>
   sendUpdate({ formType: "dgm", id, formValues: values, config });
-
+ 
 export const updateCampus = (id, values, config) =>
   sendUpdate({ formType: "campus", id, formValues: values, config });

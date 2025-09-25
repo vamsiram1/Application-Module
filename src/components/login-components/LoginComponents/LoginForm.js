@@ -7,7 +7,7 @@ import Checkbox from "../../../widgets/Checkbox/Checkbox";
 import loginValidationSchema from "../loginValidationSchema";
 import { NavLink, useNavigate } from "react-router-dom";
 import { encryptAndManipulate } from "../encryptPassword";
-import { loginSubmit, getScreenPermissions } from "../../../queries/loginquery";
+import { loginSubmit, getScreenPermissions2 } from "../../../queries/loginquery";
 import PasswordInputBox from "../../../widgets/Inputbox/PasswordInputBox";
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ const LoginForm = () => {
  
           // Call the simple function that relies on the interceptor
           console.log("Permissions method is called");
-          const response = await getScreenPermissions();
+          const response = await getScreenPermissions2(accessToken, type);
           console.log("Screen Permissions: ", response);
         } else {
           console.warn("[Login] jwt.accessToken missing in response");

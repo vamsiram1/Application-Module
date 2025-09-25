@@ -54,13 +54,13 @@ const AddressInfoSection = ({
         console.log("=== Starting to fetch states ===");
         console.log("API Service:", apiService);
         console.log("fetchDistributionStates function:", apiService.fetchDistributionStates);
-        
+       
         const states = await apiService.fetchDistributionStates();
         console.log("=== API Response received ===");
         console.log("Fetched initial states (raw):", states);
         console.log("Type of response:", typeof states);
         console.log("Is array:", Array.isArray(states));
-        
+       
         // Handle both single object and array responses
         let statesArray = [];
         if (Array.isArray(states)) {
@@ -73,30 +73,52 @@ const AddressInfoSection = ({
         } else {
           console.warn("Unexpected response type:", typeof states, states);
         }
-        
+       
         console.log("States array to process:", statesArray);
-        
+        console.log("=== DETAILED DATA ANALYSIS ===");
+        console.log("Number of states:", statesArray.length);
+        if (statesArray.length > 0) {
+          console.log("First state item:", statesArray[0]);
+          console.log("First state keys:", Object.keys(statesArray[0]));
+          console.log("First state values:", Object.values(statesArray[0]));
+          console.log("First state JSON:", JSON.stringify(statesArray[0], null, 2));
+        }
+       
         const processedStates = statesArray
           .filter((item) => {
-            const isValid = item && item.stateId != null && item.stateName;
+            console.log("🔍 Processing state item:", item);
+            console.log("🔍 Item keys:", item ? Object.keys(item) : "No keys");
+            console.log("🔍 Item stateId:", item?.stateId);
+            console.log("🔍 Item stateName:", item?.stateName);
+            console.log("🔍 Item name:", item?.name);
+            console.log("🔍 Item state_name:", item?.state_name);
+            console.log("🔍 Item id:", item?.id);
+           
+            const isValid = item && (item.stateId != null || item.id != null || item.state_id != null || item.ID != null || item.Id != null) && (item.stateName || item.name || item.state_name || item.StateName || item.STATE_NAME || item.title || item.label);
             if (!isValid) {
-              console.log("Filtered out invalid item:", item);
+              console.log("❌ Filtered out invalid item:", item);
+            } else {
+              console.log("✅ Valid item:", item);
             }
             return isValid;
           })
           .map((item) => {
+            // Try multiple possible field names for state name
+            const stateName = item.stateName || item.name || item.state_name || item.state_name || item.stateName || item.StateName || item.STATE_NAME || item.title || item.label || "Unknown State";
+            const stateId = item.stateId || item.id || item.state_id || item.ID || item.Id || "";
+           
             const processed = {
-              value: item.stateId?.toString() || "",
-              label: item.stateName || "",
+              value: stateId?.toString() || "",
+              label: stateName || "",
             };
-            console.log("Processed item:", item, "->", processed);
+            console.log("📍 Processed item:", item, "->", processed);
             return processed;
           });
-        
+       
         console.log("=== Final processed states ===");
         console.log("Processed states:", processedStates);
         console.log("Number of valid states:", processedStates.length);
-        
+       
         setDropdownOptions((prev) => {
           const newOptions = {
             ...prev,
@@ -105,21 +127,16 @@ const AddressInfoSection = ({
           console.log("Updated dropdown options:", newOptions);
           return newOptions;
         });
-        
+       
         if (processedStates.length === 0) {
           console.warn("No valid states data received. Raw response:", states);
           console.warn("States array:", statesArray);
-          
-          // Add fallback data for testing
-          const fallbackStates = [
-            { value: "1", label: "Test State 1" },
-            { value: "2", label: "Test State 2" },
-            { value: "3", label: "Test State 3" }
-          ];
-          console.log("Using fallback states for testing:", fallbackStates);
+         
+          // Don't use fallback data - show empty dropdown to indicate the issue
+          console.warn("This means the field mapping is incorrect. Check the console logs above to see the actual field names.");
           setDropdownOptions((prev) => ({
             ...prev,
-            states: fallbackStates,
+            states: [],
           }));
         } else {
           console.log(`Successfully loaded ${processedStates.length} states`);
@@ -150,15 +167,29 @@ const AddressInfoSection = ({
           } else if (districts && typeof districts === 'object') {
             districtsArray = [districts];
           }
-          
+         
+          console.log("🔍 Processing districts:", districtsArray);
+          console.log("🔍 First district item:", districtsArray[0]);
+          console.log("🔍 First district keys:", districtsArray[0] ? Object.keys(districtsArray[0]) : "No keys");
+         
           setDropdownOptions((prev) => ({
             ...prev,
             districts: districtsArray
-              .filter((item) => item && item.id != null && item.name)
-              .map((item) => ({
-                value: item.id?.toString() || "",
-                label: item.name || "",
-              })),
+              .filter((item) => {
+                console.log("🔍 District item:", item);
+                console.log("🔍 District item keys:", item ? Object.keys(item) : "No keys");
+                const isValid = item && item.id != null && item.name;
+                console.log("🔍 District item valid:", isValid);
+                return isValid;
+              })
+              .map((item) => {
+                const processed = {
+                  value: item.id?.toString() || "",
+                  label: item.name || "",
+                };
+                console.log("📍 Processed district:", item, "->", processed);
+                return processed;
+              }),
             cities: [], // Reset cities
             mandals: [], // Reset mandals
           }));
@@ -192,14 +223,14 @@ const AddressInfoSection = ({
           } else if (cities && typeof cities === 'object') {
             citiesArray = [cities];
           }
-          
+         
           let mandalsArray = [];
           if (Array.isArray(mandals)) {
             mandalsArray = mandals;
           } else if (mandals && typeof mandals === 'object') {
             mandalsArray = [mandals];
           }
-          
+         
           setDropdownOptions((prev) => ({
             ...prev,
             cities: citiesArray
@@ -266,7 +297,7 @@ const AddressInfoSection = ({
     const errors = await validateForm();
     console.log("AddressInfoSection - Validation errors:", errors);
     console.log("AddressInfoSection - Current form values:", values);
-    
+   
     // Log complete form data object
     console.log("🚀 ===== ADDRESS - FINAL SUBMITTING OBJECT =====");
     console.log("📋 Complete Form Data:", JSON.stringify(values, null, 2));
@@ -281,7 +312,7 @@ const AddressInfoSection = ({
       console.log(`  ${key}:`, value);
     });
     console.log("🚀 ===== END ADDRESS OBJECT =====");
-    
+   
     if (Object.keys(errors).length === 0) {
       console.log("Validation passed, moving to next step");
       handleNext();
@@ -310,7 +341,13 @@ const AddressInfoSection = ({
                     <Dropdown
                       dropdownname={field.label}
                       name={field.name}
-                      results={field.options.length > 0 ? field.options.map((opt) => opt.label) : ["No record found"]}
+                      results={field.options.length > 0 ? field.options.map((opt) => {
+                        if (typeof opt === 'string') return opt;
+                        if (typeof opt === 'object' && opt !== null) {
+                          return opt.label || opt.name || opt.value || opt.text || String(opt);
+                        }
+                        return String(opt);
+                      }) : ["No record found"]}
                       value={
                         field.options.find((opt) => opt.value === values[field.name])?.label || ""
                       }

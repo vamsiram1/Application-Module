@@ -1,24 +1,24 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./StatusSelector.module.css";
-
+ 
 const StatusSelector = ({ selectedStatus, onStatusSelect, showOnlyTitle = false, applicationNo }) => {
   const navigate = useNavigate();
   const statuses = ["Sale", "Confirmation", "Damaged"];
-
+ 
   const handleStatusClick = (status) => {
     // Call the original onStatusSelect if provided
     if (onStatusSelect) {
       onStatusSelect(status);
     }
-    
+   
     // Navigate to the appropriate route
     const pathSegment = status.toLowerCase();
     if (applicationNo) {
-      navigate(`/application/status/${applicationNo}/${pathSegment}`);
+      navigate(`/scopes/application/status/${applicationNo}/${pathSegment}`);
     }
   };
-
+ 
   if (showOnlyTitle) {
     return (
       <div className={styles.status_section}>
@@ -26,7 +26,7 @@ const StatusSelector = ({ selectedStatus, onStatusSelect, showOnlyTitle = false,
       </div>
     );
   }
-
+ 
   return (
     <div className={styles.status_section}>
       <h2 className={styles.status_title}>Application Status</h2>
@@ -53,5 +53,5 @@ const StatusSelector = ({ selectedStatus, onStatusSelect, showOnlyTitle = false,
     </div>
   );
 };
-
+ 
 export default StatusSelector;

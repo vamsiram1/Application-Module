@@ -1,14 +1,11 @@
-import axiosInstance from "../../axiosInstance";
-
-const DISTRIBUTION_POST = "/distribution/posts";
-
+import axios from "axios";
+const DISTRIBUTION_POST = "http://localhost:8080/distribution/posts";
 // Utility function to convert dd/mm/yyyy to yyyy-mm-dd
 const convertToBackendDateFormat = (ddmmyyyy) => {
   if (!ddmmyyyy) return "";
   const [day, month, year] = ddmmyyyy.split("/");
   return `${year}-${month}-${day}`; // Convert to yyyy-MM-dd format
 };
-
 // DTO Mappings for each form type
 const zoneFormDTO = (zoneValues) => ({
   academicYearId: zoneValues.academicYearId,
@@ -22,23 +19,21 @@ const zoneFormDTO = (zoneValues) => ({
   appEndNo: zoneValues.applicationNoTo,
   range: zoneValues.range,
   issueDate: convertToBackendDateFormat(zoneValues.issueDate),
-  createdBy: zoneValues.createdBy || 1 , // User ID or creator ID, assuming it's available
+  createdBy: zoneValues.createdBy || 1, // User ID or creator ID, assuming it's available
 });
-
 const dgmFormDTO = (dgmValues) => ({
-  userId: dgmValues.userId || 4079 ,
+  userId: dgmValues.userId || 4079,
   academicYearId: dgmValues.academicYearId,
   cityId: dgmValues.cityId,
   zoneId: dgmValues.zoneId,
   campusId: dgmValues.campusId,
   issuedToId: 3,
   dgmEmployeeId: dgmValues.issuedToEmpId,
-  selectedBalanceTrackId: dgmValues.selectedBalanceTrackId ,
+  selectedBalanceTrackId: dgmValues.selectedBalanceTrackId,
   applicationNoFrom: dgmValues.applicationNoFrom,
   applicationNoTo: dgmValues.applicationNoTo,
   range: Number(dgmValues.range),
 });
-
 const campusFormDTO = (campusValues) => ({
   userId: campusValues.userId || 4178,
   academicYearId: campusValues.academicYearId,
@@ -52,15 +47,14 @@ const campusFormDTO = (campusValues) => ({
   applicationNoTo: campusValues.applicationNoTo,
   range: Number(campusValues.range),
 });
-
-// Function to send form data using axiosInstance
+// Function to send form data using axios
 const sendFormData = async ({ formValues, formType }) => {
-  const t = String(formType ?? "").trim().toLowerCase();
-
-  console.log("Form Data: ",formValues);
+  const t = String(formType ?? "")
+    .trim()
+    .toLowerCase();
+  console.log("Form Data: ", formValues);
   let endpoint;
   let formData;
-
   // Map values to the respective DTO based on formType
   switch (t) {
     case "zone":
@@ -76,34 +70,33 @@ const sendFormData = async ({ formValues, formType }) => {
       formData = campusFormDTO(formValues);
       break;
     default:
-      throw new Error(`Invalid formType "${formType}". Expected "zone" | "dgm" | "campus".`);
+      throw new Error(
+        `Invalid formType "${formType}". Expected "zone" | "dgm" | "campus".`
+      );
   }
-
   // Build the full URL
   const fullUrl = `${DISTRIBUTION_POST}/${endpoint}`;
-
   try {
     // Send the POST request with form data to the backend
-    const response = await axiosInstance.post(fullUrl, formData);
+    const response = await axios.post(fullUrl, formData);
     return response.data; // Return the response data if successful
   } catch (error) {
     // Handle error, log it to the console, and throw a custom error
     console.error("Error submitting form:", error.response || error);
-    throw new Error(error.response?.data?.message || "An error occurred during form submission.");
+    throw new Error(
+      error.response?.data?.message ||
+        "An error occurred during form submission."
+    );
   }
 };
-
-
 // Form submission handler
 export const handlePostSubmit = async (submissionData) => {
   try {
     // Call sendFormData to submit the form
     const response = await sendFormData(submissionData);
-
     // Handle success (e.g., show success message, redirect, etc.)
     console.log("Form submitted successfully:", response);
     return response;
-
     // Additional logic after successful form submission
   } catch (error) {
     // Handle error: Display error message

@@ -173,6 +173,27 @@ const GeneralInfoSection = ({
    
     console.log(`📍 formatDateForDisplay called with:`, { dateValue, fieldName, type: typeof dateValue });
    
+    // Handle Java timestamp array format: ['java.sql.Timestamp', 1433097000000]
+    if (Array.isArray(dateValue) && dateValue.length === 2 && dateValue[0] === 'java.sql.Timestamp') {
+      const timestamp = parseInt(dateValue[1]);
+      const date = new Date(timestamp);
+      const formatted = date.toISOString().split('T')[0];
+      console.log(`📍 Converted Java timestamp array to yyyy-mm-dd:`, formatted);
+      return formatted;
+    }
+   
+    // Handle Java timestamp format: "java.sql.Timestamp,1393612200000"
+    if (typeof dateValue === 'string' && dateValue.includes('java.sql.Timestamp')) {
+      const timestampMatch = dateValue.match(/java\.sql\.Timestamp,(\d+)/);
+      if (timestampMatch) {
+        const timestamp = parseInt(timestampMatch[1]);
+        const date = new Date(timestamp);
+        const formatted = date.toISOString().split('T')[0];
+        console.log(`📍 Converted Java timestamp string to yyyy-mm-dd:`, formatted);
+        return formatted;
+      }
+    }
+   
     // If it's already in yyyy-mm-dd format, return as is
     if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
       console.log(`📍 Date already in yyyy-mm-dd format:`, dateValue);
@@ -570,6 +591,9 @@ const GeneralInfoSection = ({
         console.log("🔄 API URL will be:", `http://localhost:8080/distribution/gets/districts/${stateId}`);
         apiService.fetchSchoolDistricts(stateId).then((districts) => {
           console.log("📍 Raw school districts response:", districts);
+          console.log("📍 Response type:", typeof districts);
+          console.log("📍 Response keys:", districts ? Object.keys(districts) : "No keys");
+          console.log("📍 Full response structure:", JSON.stringify(districts, null, 2));
          
           // Handle different data structures
           let processedDistricts = districts;
@@ -581,12 +605,22 @@ const GeneralInfoSection = ({
             }
           }
          
-          const mappedDistricts = processedDistricts.map((item) => ({
-            id: (item?.id || item?.districtId)?.toString() || "",
-            label: item?.name || item?.districtName || item?.label || String(item)
-          }));
+          console.log("📍 Processed districts array:", processedDistricts);
+          console.log("📍 Number of districts before mapping:", processedDistricts.length);
          
-          console.log("📍 Mapped school districts:", mappedDistricts);
+          const mappedDistricts = processedDistricts.map((item, index) => {
+            console.log(`📍 Processing district ${index}:`, item);
+            const mapped = {
+              id: (item?.id || item?.districtId)?.toString() || "",
+              label: item?.name || item?.districtName || item?.label || String(item)
+            };
+            console.log(`📍 Mapped district ${index}:`, mapped);
+            return mapped;
+          });
+         
+          console.log("📍 Final mapped school districts:", mappedDistricts);
+          console.log("📍 Number of districts after mapping:", mappedDistricts.length);
+         
           setDropdownOptions((prev) => {
             const newOptions = {
               ...prev,
@@ -879,25 +913,48 @@ const GeneralInfoSection = ({
           console.log("📍 Raw orientation details response:", details);
           console.log("📍 Response type:", typeof details);
           console.log("📍 Response keys:", details ? Object.keys(details) : "No keys");
+          console.log("📍 Full response structure:", JSON.stringify(details, null, 2));
          
           // Auto-populate orientation start date and fee
           if (details) {
-            console.log("📍 Checking for startDate in details:", details.startDate);
-            console.log("📍 Checking for orientationStartDate in details:", details.orientationStartDate);
-            console.log("📍 Checking for date in details:", details.date);
-           
             // Try multiple possible field names for the date
-            let dateValue = details.startDate || details.orientationStartDate || details.date || details.orientation_date || details.batchStartDate;
-            console.log("📍 Extracted date value:", dateValue);
+            const possibleDateFields = [
+              'startDate', 'orientationStartDate', 'date', 'orientation_date', 'batchStartDate',
+              'start_date', 'orientationStartDate', 'batchStartDate', 'orientationDate',
+              'endDate', 'orientationEndDate', 'batchEndDate', 'orientation_end_date',
+              'startTime', 'orientationStartTime', 'batchStartTime', 'orientation_start_time',
+              'createdDate', 'created_date', 'updatedDate', 'updated_date'
+            ];
+           
+            let dateValue = null;
+            for (const field of possibleDateFields) {
+              if (details[field]) {
+                dateValue = details[field];
+                console.log(`📍 Found date in field '${field}':`, dateValue);
+                break;
+              }
+            }
+           
+            console.log("📍 Final extracted date value:", dateValue);
            
             if (dateValue) {
+              console.log("📍 Raw date value before formatting:", dateValue);
+              console.log("📍 Date value type:", typeof dateValue);
+             
               // Format the date to yyyy-mm-dd for HTML date input
               const formattedDate = formatDateForDisplay(dateValue, "orientationDates");
-              console.log("📍 Formatted date:", formattedDate);
+              console.log("📍 Formatted date result:", formattedDate);
+              console.log("📍 Formatted date type:", typeof formattedDate);
+             
               setFieldValue("orientationDates", formattedDate);
               console.log("✅ Auto-populated orientation start date:", formattedDate);
+             
+              // Verify the field was set correctly
+              setTimeout(() => {
+                console.log("📍 Verification - Current orientationDates value:", values.orientationDates);
+              }, 100);
             } else {
-              console.log("❌ No date value found in response");
+              console.log("❌ No date value found in response. Available fields:", Object.keys(details));
             }
            
             // Try multiple possible field names for the fee
@@ -979,14 +1036,15 @@ const GeneralInfoSection = ({
       const batchId = finalValue;
       const campusId = values.joinedCampus;
       const classId = values.joiningClassName;
-      console.log("🎯 Orientation Batch changed:", { name, orientationId, batchId, campusId, classId, finalValue });
+      const studyTypeId = values.batchType;
+      console.log("🎯 Orientation Batch changed:", { name, orientationId, batchId, campusId, classId, studyTypeId, finalValue });
       console.log("🎯 Current form values:", values);
      
-      if (orientationId && batchId && campusId && classId) {
+      if (orientationId && batchId && campusId && classId && studyTypeId) {
         console.log("🔄 Fetching orientation details for campus:", campusId, "class:", classId, "orientation:", orientationId, "and batch:", batchId);
-        console.log("🔄 API URL will be:", `http://localhost:8080/api/student-admissions-sale/${campusId}/${classId}/${orientationId}/${batchId}/details`);
+        console.log("🔄 API URL will be:", `http://localhost:8080/api/student-admissions-sale/get_orientation_startDate_and_fee?cmpsId=${campusId}&classId=${classId}&studyTypeId=${studyTypeId}&orientationId=${orientationId}&orientationBatchId=${batchId}`);
        
-        apiService.fetchOrientationDetails(campusId, classId, orientationId, batchId).then((details) => {
+        apiService.fetchOrientationStartDateAndFee(campusId, classId, studyTypeId, orientationId, batchId).then((details) => {
           console.log("📍 Raw orientation details response:", details);
           console.log("📍 Response type:", typeof details);
           console.log("📍 Response keys:", details ? Object.keys(details) : "No response");
@@ -1022,22 +1080,21 @@ const GeneralInfoSection = ({
            
             if (dateValue) {
               console.log("📍 Raw orientation date from API:", dateValue);
+              console.log("📍 Date value type:", typeof dateValue);
              
-              // Convert ISO date to yyyy-MM-dd format for HTML date input
-              let formattedDate = dateValue;
-              if (typeof dateValue === 'string' && dateValue.includes('T')) {
-                // Extract just the date part (yyyy-MM-dd) from ISO string
-                formattedDate = dateValue.split('T')[0];
-                console.log("📍 Converted date format:", formattedDate);
-              } else if (dateValue instanceof Date) {
-                // Convert Date object to yyyy-MM-dd format
-                formattedDate = dateValue.toISOString().split('T')[0];
-                console.log("📍 Converted Date object to format:", formattedDate);
-              }
+              // Use the formatDateForDisplay function to handle all date formats including Java timestamps
+              const formattedDate = formatDateForDisplay(dateValue, "orientationDates");
+              console.log("📍 Formatted date using formatDateForDisplay:", formattedDate);
+              console.log("📍 Formatted date type:", typeof formattedDate);
              
               console.log("📍 Setting orientation date:", formattedDate);
               setFieldValue("orientationDates", formattedDate);
               console.log("✅ Orientation date set successfully");
+             
+              // Verify the field was set correctly
+              setTimeout(() => {
+                console.log("📍 Verification - Current orientationDates value:", values.orientationDates);
+              }, 100);
             } else {
               console.log("⚠️ No date field found in response. Available fields:", Object.keys(details));
             }
@@ -1320,7 +1377,13 @@ const GeneralInfoSection = ({
                   <Dropdown
                     dropdownname={field.label}
                     name={field.name}
-                    results={Array.isArray(options) ? options.map((opt) => opt.label || opt) : []}
+                    results={Array.isArray(options) ? options.map((opt) => {
+                      if (typeof opt === 'string') return opt;
+                      if (typeof opt === 'object' && opt !== null) {
+                        return opt.label || opt.name || opt.value || opt.text || JSON.stringify(opt);
+                      }
+                      return String(opt);
+                    }) : []}
                     value={Array.isArray(options) ? (options.find((opt) => opt.id === values[field.name])?.label || "") : ""}
                     onChange={handleSectionChange}
                     error={shouldShowError(field.name)}
