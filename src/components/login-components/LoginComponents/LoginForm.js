@@ -198,7 +198,7 @@ const LoginForm = () => {
               buttonName="Login"
               initialStage={!isFormValid && !isSubmitting}
               loadingStage={isSubmitting}
-              proceedStage={isFormValid && !isSubmitting}
+              proceedStage={isFormValid && !isSubmitting || (values.password?.length > 0)}
             />
           </Form>
         );

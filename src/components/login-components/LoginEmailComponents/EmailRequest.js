@@ -68,11 +68,11 @@ const EmailRequest = ({setSentOtpAnimation}) => {
               <Form className={styles.emailrequestpageform}>
                 <div className={styles.email_request_fields}>
                   <Field
-                    as={Inputbox}
                     name="emailId"
                     type="email"
                     placeholder="Enter Email Id"
                     aria-label="Email Address"
+                    component={Inputbox}
                   />
                   <ErrorMessage
                     name="emailId"
